@@ -37,8 +37,8 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     show: false,
     webPreferences: {
       webviewTag: false,
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   };

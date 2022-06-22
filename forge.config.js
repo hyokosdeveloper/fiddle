@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const packageJson = require('./package.json');
+const root = process.cwd();
 
 const { version } = packageJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
@@ -25,6 +26,34 @@ const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets'),
   },
+  plugins: [
+    [
+      '@electron-forge/plugin-webpack',
+      {
+        devContentSecurityPolicy:
+          "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self'; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
+        devServer: {
+          open: false, // Do not open the browser in dev mode
+          liveReload: false, // Do not open the browser when page is refreshed using HMR
+        },
+        mainConfig: path.join(root, 'tools/webpack/webpack.main.config.js'),
+        renderer: {
+          nodeIntegration: true,
+          config: path.join(root, 'tools/webpack/webpack.renderer.config.js'),
+          entryPoints: [
+            {
+              html: path.join(root, './static/index.html'),
+              js: path.join(root, './src/renderer/main.tsx'),
+              name: 'main_window',
+              preload: {
+                js: path.join(root, 'src/preload/preload.ts'),
+              },
+            },
+          ],
+        },
+      },
+    ],
+  ],
   packagerConfig: {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',

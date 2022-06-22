@@ -2,11 +2,15 @@ import { app, BrowserWindow, shell } from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
-import * as path from 'path';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 export let browserWindows: Array<BrowserWindow | null> = [];
+
+// Global variables exposed by forge/webpack-plugin to reference
+// the entry point of preload and index.html over http://
+declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 /**
  * Gets default options for the main window
@@ -35,7 +39,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       webviewTag: false,
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, '..', 'preload', 'preload'),
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   };
 }
@@ -50,7 +54,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
   let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
-  browserWindow.loadFile('./dist/static/index.html');
+  browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   browserWindow.webContents.once('dom-ready', () => {
     if (browserWindow) {
